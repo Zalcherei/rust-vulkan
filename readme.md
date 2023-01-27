@@ -11,15 +11,14 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-anyhow = "1"
-lazy_static = "1"
-log = "0.4"
-nalgebra-glm = "0.10"
-png = "0.16"
-pretty_env_logger = "0.4"
-thiserror = "1"
-tobj = "2"
-vulkanalia = { version = "=0.12.0", features = ["libloading", "window"] }
-winit = "0.24"
+anyhow = "1.0.68"
+lazy_static = "1.4.0"
+log = "0.4.17"
+nalgebra-glm = "0.18.0"
+png = "0.17.7"
+pretty_env_logger = "0.4.0"
+thiserror = "1.0.38"
+tobj = { version = "3.2.3", features = ["log"] }
+vulkanalia = { version = "=0.17.0", features = ["libloading", "window"] }
+winit = "0.27.5"
 ```
-* Note: I haven't tested this Vulkania tutorial with the latest versions of the dependencies.

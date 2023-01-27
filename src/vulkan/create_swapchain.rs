@@ -1,6 +1,6 @@
 use crate::vulkan::{
-    get_swapchain_extent, get_swapchain_present_mode, get_swapchain_surface_format, AppData, QueueFamilyIndices,
-    SwapchainSupport,
+    get_swapchain_extent, get_swapchain_present_mode, get_swapchain_surface_format, AppData,
+    QueueFamilyIndices, SwapchainSupport,
 };
 use anyhow::Result;
 use vulkanalia::{prelude::v1_0::*, vk::KhrSwapchainExtension};
@@ -12,6 +12,8 @@ pub unsafe fn create_swapchain(
     device: &Device,
     data: &mut AppData,
 ) -> Result<()> {
+    // Image
+
     let indices = QueueFamilyIndices::get(instance, data, data.physical_device)?;
     let support = SwapchainSupport::get(instance, data, data.physical_device)?;
 
@@ -23,7 +25,9 @@ pub unsafe fn create_swapchain(
     data.swapchain_extent = extent;
 
     let mut image_count = support.capabilities.min_image_count + 1;
-    if support.capabilities.max_image_count != 0 && image_count > support.capabilities.max_image_count {
+    if support.capabilities.max_image_count != 0
+        && image_count > support.capabilities.max_image_count
+    {
         image_count = support.capabilities.max_image_count;
     }
 
@@ -35,6 +39,8 @@ pub unsafe fn create_swapchain(
     } else {
         vk::SharingMode::EXCLUSIVE
     };
+
+    // Create
 
     let info = vk::SwapchainCreateInfoKHR::builder()
         .surface(data.surface)
@@ -53,6 +59,8 @@ pub unsafe fn create_swapchain(
         .old_swapchain(vk::SwapchainKHR::null());
 
     data.swapchain = device.create_swapchain_khr(&info, None)?;
+
+    // Images
 
     data.swapchain_images = device.get_swapchain_images_khr(data.swapchain)?;
 

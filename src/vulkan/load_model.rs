@@ -4,13 +4,20 @@ use nalgebra_glm as glm;
 use std::{collections::HashMap, fs::File, io::BufReader};
 
 pub fn load_model(data: &mut AppData) -> Result<()> {
-    let mut reader = BufReader::new(File::open("/resources/viking_room.obj")?);
+    // Model
 
-    let (models, _) = tobj::load_obj_buf(&mut reader, true, |_| {
-        let mut map = HashMap::new();
-        map.insert("Texture1".to_string(), 0);
-        Ok((vec![tobj::Material::empty()], map))
-    })?;
+    let mut reader = BufReader::new(File::open("tutorial/resources/viking_room.obj")?);
+
+    let (models, _) = tobj::load_obj_buf(
+        &mut reader,
+        &tobj::LoadOptions {
+            triangulate: true,
+            ..Default::default()
+        },
+        |_| Ok(Default::default()),
+    )?;
+
+    // Vertices / Indices
 
     let mut unique_vertices = HashMap::new();
 

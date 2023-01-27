@@ -12,13 +12,19 @@ pub unsafe fn generate_mipmaps(
     height: u32,
     mip_levels: u32,
 ) -> Result<()> {
+    // Support
+
     if !instance
         .get_physical_device_format_properties(data.physical_device, format)
         .optimal_tiling_features
         .contains(vk::FormatFeatureFlags::SAMPLED_IMAGE_FILTER_LINEAR)
     {
-        return Err(anyhow!("Texture image format does not support linear blitting!"));
+        return Err(anyhow!(
+            "Texture image format does not support linear blitting!"
+        ));
     }
+
+    // Mipmaps
 
     let command_buffer = begin_single_time_commands(device, data)?;
 
@@ -114,16 +120,12 @@ pub unsafe fn generate_mipmaps(
         if mip_width > 1 {
             mip_width /= 2;
         }
-
-        if mip_height > 1 {
-            mip_height /= 2;
-        }
     }
 
     barrier.subresource_range.base_mip_level = mip_levels - 1;
-    barrier.old_layout = vk::ImageLayout::TRANSFER_DST_OPTIMAL;
+    barrier.old_layout = vk::ImageLayout::TRANSFER_SRC_OPTIMAL;
     barrier.new_layout = vk::ImageLayout::SHADER_READ_ONLY_OPTIMAL;
-    barrier.src_access_mask = vk::AccessFlags::TRANSFER_WRITE;
+    barrier.src_access_mask = vk::AccessFlags::TRANSFER_READ;
     barrier.dst_access_mask = vk::AccessFlags::SHADER_READ;
 
     device.cmd_pipeline_barrier(

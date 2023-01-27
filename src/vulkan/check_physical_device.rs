@@ -1,5 +1,6 @@
 use crate::vulkan::{
-    check_physical_device_extensions, AppData, QueueFamilyIndices, SuitabilityError, SwapchainSupport,
+    check_physical_device_extensions, AppData, QueueFamilyIndices, SuitabilityError,
+    SwapchainSupport,
 };
 use anyhow::{anyhow, Result};
 use vulkanalia::prelude::v1_0::*;
@@ -16,5 +17,11 @@ pub unsafe fn check_physical_device(
     if support.formats.is_empty() || support.present_modes.is_empty() {
         return Err(anyhow!(SuitabilityError("Insufficient swapchain support.")));
     }
+
+    let features = instance.get_physical_device_features(physical_device);
+    if features.sampler_anisotropy != vk::TRUE {
+        return Err(anyhow!(SuitabilityError("No sampler anisotropy.")));
+    }
+
     Ok(())
 }

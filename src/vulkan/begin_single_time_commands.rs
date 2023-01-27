@@ -2,7 +2,12 @@ use crate::vulkan::AppData;
 use anyhow::Result;
 use vulkanalia::prelude::v1_0::*;
 
-pub unsafe fn begin_single_time_commands(device: &Device, data: &AppData) -> Result<vk::CommandBuffer> {
+pub unsafe fn begin_single_time_commands(
+    device: &Device,
+    data: &AppData,
+) -> Result<vk::CommandBuffer> {
+    // Allocate
+
     let info = vk::CommandBufferAllocateInfo::builder()
         .level(vk::CommandBufferLevel::PRIMARY)
         .command_pool(data.command_pool)
@@ -10,7 +15,10 @@ pub unsafe fn begin_single_time_commands(device: &Device, data: &AppData) -> Res
 
     let command_buffer = device.allocate_command_buffers(&info)?[0];
 
-    let info = vk::CommandBufferBeginInfo::builder().flags(vk::CommandBufferUsageFlags::ONE_TIME_SUBMIT);
+    // Begin
+
+    let info =
+        vk::CommandBufferBeginInfo::builder().flags(vk::CommandBufferUsageFlags::ONE_TIME_SUBMIT);
 
     device.begin_command_buffer(command_buffer, &info)?;
 

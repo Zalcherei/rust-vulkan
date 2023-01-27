@@ -9,11 +9,11 @@ pub unsafe fn create_image_view(
     mip_levels: u32,
 ) -> Result<vk::ImageView> {
     let subresource_range = vk::ImageSubresourceRange::builder()
-        .aspect_mask(vk::ImageAspectFlags::COLOR)
+        .aspect_mask(aspects)
         .base_mip_level(0)
-        .level_count(1)
+        .level_count(mip_levels)
         .base_array_layer(0)
-        .level_count(1);
+        .layer_count(1);
 
     let info = vk::ImageViewCreateInfo::builder()
         .image(image)

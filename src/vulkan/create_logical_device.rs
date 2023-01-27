@@ -4,9 +4,13 @@ use std::collections::HashSet;
 use vulkanalia::prelude::v1_0::*;
 
 const VALIDATION_ENABLED: bool = cfg!(debug_assertions);
-const VALIDATION_LAYER: vk::ExtensionName = vk::ExtensionName::from_bytes(b"VK_LAYER_KHRONOS_validation");
+const VALIDATION_LAYER: vk::ExtensionName =
+    vk::ExtensionName::from_bytes(b"VK_LAYER_KHRONOS_validation");
+const DEVICE_EXTENSIONS: &[vk::ExtensionName] = &[vk::KHR_SWAPCHAIN_EXTENSION.name];
 
 pub unsafe fn create_logical_device(instance: &Instance, data: &mut AppData) -> Result<Device> {
+    // Qeueu Create Infos
+
     let indices = QueueFamilyIndices::get(instance, data, data.physical_device)?;
 
     let mut unique_indices = HashSet::new();
@@ -23,20 +27,38 @@ pub unsafe fn create_logical_device(instance: &Instance, data: &mut AppData) -> 
         })
         .collect::<Vec<_>>();
 
+    // Layers
+
     let layers = if VALIDATION_ENABLED {
         vec![VALIDATION_LAYER.as_ptr()]
     } else {
         vec![]
     };
 
-    let features = vk::PhysicalDeviceFeatures::builder();
+    // Extensions
+
+    let extensions = DEVICE_EXTENSIONS
+        .iter()
+        .map(|n| n.as_ptr())
+        .collect::<Vec<_>>();
+
+    // Features
+
+    let features = vk::PhysicalDeviceFeatures::builder()
+        .sampler_anisotropy(true)
+        .sample_rate_shading(true);
+
+    // Create
 
     let info = vk::DeviceCreateInfo::builder()
         .queue_create_infos(&queue_infos)
         .enabled_layer_names(&layers)
+        .enabled_extension_names(&extensions)
         .enabled_features(&features);
 
     let device = instance.create_device(data.physical_device, &info, None)?;
+
+    // Qeueus
 
     data.graphics_queue = device.get_device_queue(indices.graphics, 0);
     data.present_queue = device.get_device_queue(indices.present, 0);

@@ -13,6 +13,7 @@ pub unsafe fn create_texture_sampler(device: &Device, data: &mut AppData) -> Res
         .max_anisotropy(16.0)
         .border_color(vk::BorderColor::INT_OPAQUE_BLACK)
         .unnormalized_coordinates(false)
+        .compare_enable(false)
         .compare_op(vk::CompareOp::ALWAYS)
         .mipmap_mode(vk::SamplerMipmapMode::LINEAR)
         .min_lod(0.0)

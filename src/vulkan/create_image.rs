@@ -15,6 +15,8 @@ pub unsafe fn create_image(
     usage: vk::ImageUsageFlags,
     properties: vk::MemoryPropertyFlags,
 ) -> Result<(vk::Image, vk::DeviceMemory)> {
+    // Image
+
     let info = vk::ImageCreateInfo::builder()
         .image_type(vk::ImageType::_2D)
         .extent(vk::Extent3D {
@@ -22,22 +24,29 @@ pub unsafe fn create_image(
             height,
             depth: 1,
         })
-        .mip_levels(1)
+        .mip_levels(mip_levels)
         .array_layers(1)
         .format(format)
         .tiling(tiling)
         .initial_layout(vk::ImageLayout::UNDEFINED)
         .usage(usage)
-        .samples(vk::SampleCountFlags::_1)
+        .samples(samples)
         .sharing_mode(vk::SharingMode::EXCLUSIVE);
 
     let image = device.create_image(&info, None)?;
+
+    // Memory
 
     let requirements = device.get_image_memory_requirements(image);
 
     let info = vk::MemoryAllocateInfo::builder()
         .allocation_size(requirements.size)
-        .memory_type_index(get_memory_type_index(instance, data, properties, requirements)?);
+        .memory_type_index(get_memory_type_index(
+            instance,
+            data,
+            properties,
+            requirements,
+        )?);
 
     let image_memory = device.allocate_memory(&info, None)?;
 

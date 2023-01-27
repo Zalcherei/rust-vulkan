@@ -1,7 +1,10 @@
 use vulkanalia::prelude::v1_0::*;
 use winit::window::Window;
 
-pub fn get_swapchain_extent(window: &Window, capabilities: vk::SurfaceCapabilitiesKHR) -> vk::Extent2D {
+pub fn get_swapchain_extent(
+    window: &Window,
+    capabilities: vk::SurfaceCapabilitiesKHR,
+) -> vk::Extent2D {
     if capabilities.current_extent.width != u32::max_value() {
         capabilities.current_extent
     } else {
