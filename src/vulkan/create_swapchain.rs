@@ -6,12 +6,7 @@ use anyhow::Result;
 use vulkanalia::{prelude::v1_0::*, vk::KhrSwapchainExtension};
 use winit::window::Window;
 
-pub unsafe fn create_swapchain(
-    window: &Window,
-    instance: &Instance,
-    device: &Device,
-    data: &mut AppData,
-) -> Result<()> {
+pub unsafe fn create_swapchain(window: &Window, instance: &Instance, device: &Device, data: &mut AppData) -> Result<()> {
     // Image
 
     let indices = QueueFamilyIndices::get(instance, data, data.physical_device)?;
@@ -25,9 +20,7 @@ pub unsafe fn create_swapchain(
     data.swapchain_extent = extent;
 
     let mut image_count = support.capabilities.min_image_count + 1;
-    if support.capabilities.max_image_count != 0
-        && image_count > support.capabilities.max_image_count
-    {
+    if support.capabilities.max_image_count != 0 && image_count > support.capabilities.max_image_count {
         image_count = support.capabilities.max_image_count;
     }
 
@@ -42,21 +35,7 @@ pub unsafe fn create_swapchain(
 
     // Create
 
-    let info = vk::SwapchainCreateInfoKHR::builder()
-        .surface(data.surface)
-        .min_image_count(image_count)
-        .image_format(surface_format.format)
-        .image_color_space(surface_format.color_space)
-        .image_extent(extent)
-        .image_array_layers(1)
-        .image_usage(vk::ImageUsageFlags::COLOR_ATTACHMENT)
-        .image_sharing_mode(image_sharing_mode)
-        .queue_family_indices(&queue_family_indices)
-        .pre_transform(support.capabilities.current_transform)
-        .composite_alpha(vk::CompositeAlphaFlagsKHR::OPAQUE)
-        .present_mode(present_mode)
-        .clipped(true)
-        .old_swapchain(vk::SwapchainKHR::null());
+    let info = vk::SwapchainCreateInfoKHR::builder().surface(data.surface).min_image_count(image_count).image_format(surface_format.format).image_color_space(surface_format.color_space).image_extent(extent).image_array_layers(1).image_usage(vk::ImageUsageFlags::COLOR_ATTACHMENT).image_sharing_mode(image_sharing_mode).queue_family_indices(&queue_family_indices).pre_transform(support.capabilities.current_transform).composite_alpha(vk::CompositeAlphaFlagsKHR::OPAQUE).present_mode(present_mode).clipped(true).old_swapchain(vk::SwapchainKHR::null());
 
     data.swapchain = device.create_swapchain_khr(&info, None)?;
 

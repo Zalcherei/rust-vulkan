@@ -23,16 +23,14 @@ fn main() -> Result<()> {
     // Window
 
     let event_loop = EventLoop::new();
-    let window = WindowBuilder::new()
-        .with_title("Rust Vulkan (Rust)")
-        .with_inner_size(LogicalSize::new(1024, 768))
-        .build(&event_loop)?;
+    let window = WindowBuilder::new().with_title("Vulkan Tutorial (rust)").with_inner_size(LogicalSize::new(1024, 768)).build(&event_loop)?;
 
     // App
 
     let mut app = unsafe { App::create(&window)? };
     let mut destroying = false;
     let mut minimized = false;
+
     event_loop.run(move |event, _, control_flow| {
         *control_flow = ControlFlow::Poll;
         match event {
@@ -47,14 +45,11 @@ fn main() -> Result<()> {
                     app.resized = true;
                 }
             }
-            // Destroy Vulkan app
-            Event::WindowEvent {
-                event: WindowEvent::CloseRequested,
-                ..
-            } => {
+            // Destroy out Vulkan app
+            Event::WindowEvent { event: WindowEvent::CloseRequested, .. } => {
                 destroying = true;
                 *control_flow = ControlFlow::Exit;
-                unsafe { app.destroy() }
+                unsafe { app.destroy(); }
             }
             // Handle keyboard events
             Event::WindowEvent { event: WindowEvent::KeyboardInput { input, .. }, .. } => {

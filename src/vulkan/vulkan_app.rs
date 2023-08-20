@@ -20,9 +20,12 @@ use vulkanalia::{
 };
 use winit::window::Window;
 
-const VALIDATION_ENABLED: bool = cfg!(debug_assertions);
+// Whether the validation layers should be enabled
+const VALIDATION_ENABLED: bool = cfg!(debug_assertion);
+// The maximum number off frames that can be processed concurrently
 const MAX_FRAMES_IN_FLIGHT: usize = 2;
 
+// Our Vulkan app
 #[derive(Clone, Debug)]
 pub struct App {
     pub entry: Entry,
@@ -35,16 +38,16 @@ pub struct App {
     pub models: usize,
 }
 
+// Creates our Vulkan app
 impl App {
-    /// Creates Vulkan app
     pub unsafe fn create(window: &Window) -> Result<Self> {
         let loader = LibloadingLoader::new(LIBRARY)?;
         let entry = Entry::new(loader).map_err(|b| anyhow!("{}", b))?;
         let mut data = AppData::default();
         let instance = create_instance(window, &entry, &mut data)?;
-        data.surface = vk_window::create_surface(&instance, window)?;
+        data.surface = vk_window::create_surface(&instance, &window, &window)?;
         pick_physical_device(&instance, &mut data)?;
-        let device = create_logical_device(&instance, &mut data)?;
+        let device = create_logical_device(&entry, &instance, &mut data)?;
         create_swapchain(window, &instance, &device, &mut data)?;
         create_swapchain_image_views(&device, &mut data)?;
         create_render_pass(&instance, &device, &mut data)?;
@@ -77,7 +80,7 @@ impl App {
         })
     }
 
-    /// Renders a frame for Vulkan app
+    // Renders a frame for out vulkan app
     pub unsafe fn render(&mut self, window: &Window) -> Result<()> {
         let in_flight_fence = self.data.in_flight_fences[self.frame];
 
@@ -130,11 +133,8 @@ impl App {
             .swapchains(swapchains)
             .image_indices(image_indices);
 
-        let result = self
-            .device
-            .queue_present_khr(self.data.present_queue, &present_info);
-        let changed = result == Ok(vk::SuccessCode::SUBOPTIMAL_KHR)
-            || result == Err(vk::ErrorCode::OUT_OF_DATE_KHR);
+        let result = self.device.queue_present_khr(self.data.present_queue, &present_info);
+        let changed = result == Ok(vk::SuccessCode::SUBOPTIMAL_KHR) || result == Err(vk::ErrorCode::OUT_OF_DATE_KHR);
         if self.resized || changed {
             self.resized = false;
             self.recreate_swapchain(window)?;
@@ -147,9 +147,9 @@ impl App {
         Ok(())
     }
 
-    /// Updates a command buffer for Vulkan app
+    // Updes a command buffer for out Vulkan app
     #[rustfmt::skip]
-    unsafe fn update_command_buffer(&mut self, image_index: usize) -> Result<()> {
+    pub unsafe fn update_command_buffer(&mut self, image_index: usize) -> Result<()> {
         // Reset
 
         let command_pool = self.data.command_pools[image_index];
@@ -157,7 +157,7 @@ impl App {
 
         let command_buffer = self.data.command_buffers[image_index];
 
-        // commands
+        // Commands
 
         let info = vk::CommandBufferBeginInfo::builder().flags(vk::CommandBufferUsageFlags::ONE_TIME_SUBMIT);
 
@@ -185,14 +185,14 @@ impl App {
 
         self.device.cmd_end_render_pass(command_buffer);
 
-        self.device.end_command_buffer(command_buffer);
+        self.device.end_command_buffer(command_buffer)?;
 
         Ok(())
     }
 
-    /// Updates a secondary command buffer for Vulkan app
+    // Updates a secondary command buffer for our Vulkan app
     #[rustfmt::skip]
-    unsafe fn update_secondary_command_buffer(&mut self, image_index: usize, model_index: usize) -> Result<vk::CommandBuffer> {
+    pub unsafe fn update_secondary_command_buffer(&mut self, image_index: usize, model_index: usize) -> Result<vk::CommandBuffer> {
         // Allocate
 
         let command_buffers = &mut self.data.secondary_command_buffers[image_index];
@@ -208,7 +208,7 @@ impl App {
         // Model
 
         let y = (((model_index % 2) as f32) * 2.5) - 1.25;
-        let z = (((model_index / 2) as f32) * -2.0) + 1.0;
+        let z = (((model_index / 2) as f32) * -2.0) - 1.0;
 
         let model = glm::translate(&glm::identity(), &glm::vec3(0.0, y, z));
 
@@ -242,22 +242,13 @@ impl App {
         Ok(command_buffer)
     }
 
-    /// Updates the uniform buffer object for Vulkan app
-    unsafe fn update_uniform_buffer(&self, image_index: usize) -> Result<()> {
+    // Updates the uniform buffer object for our Vulkan app
+    pub unsafe fn update_uniform_buffer(&self, image_index: usize) -> Result<()> {
         // MVP
 
-        let view = glm::look_at(
-            &glm::vec3(6.0, 0.0, 2.0),
-            &glm::vec3(0.0, 0.0, 0.0),
-            &glm::vec3(0.0, 0.0, 1.0),
-        );
+        let view = glm::look_at(&glm::vec3(6.0, 0.0, 2.0), &glm::vec3(0.0, 0.0, 0.0), &glm::vec3(0.0, 0.0, 1.0));
 
-        let mut proj = glm::perspective_rh_zo(
-            self.data.swapchain_extent.width as f32 / self.data.swapchain_extent.height as f32,
-            glm::radians(&glm::vec1(45.0))[0],
-            0.1,
-            10.0,
-        );
+        let mut proj = glm::perspective_rh_zo(self.data.swapchain_extent.width as f32 / self.data.swapchain_extent.height as f32, glm::radians(&glm::vec1(45.0))[0], 0.1, 10.0);
 
         proj[(1, 1)] *= -1.0;
 
@@ -265,24 +256,18 @@ impl App {
 
         // Copy
 
-        let memory = self.device.map_memory(
-            self.data.uniform_buffers_memory[image_index],
-            0,
-            size_of::<UniformBufferObject>() as u64,
-            vk::MemoryMapFlags::empty(),
-        )?;
+        let memory = self.device.map_memory(self.data.uniform_buffers_memory[image_index], 0, size_of::<UniformBufferObject>() as u64, vk::MemoryMapFlags::empty())?;
 
         memcpy(&ubo, memory.cast(), 1);
 
-        self.device
-            .unmap_memory(self.data.uniform_buffers_memory[image_index]);
+        self.device.unmap_memory(self.data.uniform_buffers_memory[image_index]);
 
         Ok(())
     }
 
-    /// Recreates the swapchain for Vulkan app
+    // Recreates the swapchain for our Vulkan app
     #[rustfmt::skip]
-    unsafe fn recreate_swapchain(&mut self, window: &Window) -> Result<()> {
+    pub unsafe fn recreate_swapchain(&mut self, window: &Window) -> Result<()> {
         self.device.device_wait_idle()?;
         self.destroy_swapchain();
         create_swapchain(window, &self.instance, &self.device, &mut self.data)?;
@@ -292,7 +277,6 @@ impl App {
         create_color_objects(&self.instance, &self.device, &mut self.data)?;
         create_depth_objects(&self.instance, &self.device, &mut self.data)?;
         create_framebuffers(&self.device, &mut self.data)?;
-        create_uniform_buffers(&self.instance, &self.device, &mut self.data)?;
         create_descriptor_pool(&self.device, &mut self.data)?;
         create_descriptor_sets(&self.device, &mut self.data)?;
         create_command_buffers(&self.device, &mut self.data)?;
@@ -300,8 +284,7 @@ impl App {
         Ok(())
     }
 
-    /// Destroy Vulkan app
-    #[rustfmt::skip]
+    // Destroy our Vulkan app
     pub unsafe fn destroy(&mut self) {
         self.device.device_wait_idle().unwrap();
 
@@ -331,9 +314,9 @@ impl App {
         self.instance.destroy_instance(None);
     }
 
-    /// Destroys the parts of Vulkan app related to the swapchain
+    // Destroy the parts of our Vulkan app related to the swapchain
     #[rustfmt::skip]
-    unsafe fn destroy_swapchain(&mut self) {
+    pub unsafe fn destroy_swapchain(&mut self) {
         self.device.destroy_descriptor_pool(self.data.descriptor_pool, None);
         self.data.uniform_buffers_memory.iter().for_each(|m| self.device.free_memory(*m, None));
         self.data.uniform_buffers.iter().for_each(|b| self.device.destroy_buffer(*b, None));

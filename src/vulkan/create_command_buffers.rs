@@ -5,9 +5,7 @@ use vulkanalia::prelude::v1_0::*;
 pub unsafe fn create_command_buffers(device: &Device, data: &mut AppData) -> Result<()> {
     let num_images = data.swapchain_images.len();
     for image_index in 0..num_images {
-        let allocate_info = vk::CommandBufferAllocateInfo::builder()
-            .level(vk::CommandBufferLevel::PRIMARY)
-            .command_buffer_count(1);
+        let allocate_info = vk::CommandBufferAllocateInfo::builder().level(vk::CommandBufferLevel::PRIMARY).command_buffer_count(1);
 
         let command_buffer = device.allocate_command_buffers(&allocate_info)?[0];
         data.command_buffers.push(command_buffer);
