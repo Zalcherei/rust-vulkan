@@ -5,7 +5,11 @@ use crate::vulkan::{
 use anyhow::{anyhow, Result};
 use vulkanalia::prelude::v1_0::*;
 
-pub unsafe fn check_physical_device(instance: &Instance, data: &AppData, physical_device: vk::PhysicalDevice) -> Result<()> {
+pub unsafe fn check_physical_device(
+    instance: &Instance,
+    data: &AppData,
+    physical_device: vk::PhysicalDevice,
+) -> Result<()> {
     QueueFamilyIndices::get(instance, data, physical_device)?;
     check_physical_device_extensions(instance, physical_device)?;
 

@@ -8,7 +8,9 @@ pub unsafe fn create_shader_module(device: &Device, bytecode: &[u8]) -> Result<v
         return Err(anyhow!("Shader bytecode is not properly aligned"));
     }
 
-    let info = vk::ShaderModuleCreateInfo::builder().code_size(bytecode.len()).code(code);
+    let info = vk::ShaderModuleCreateInfo::builder()
+        .code_size(bytecode.len())
+        .code(code);
 
     Ok(device.create_shader_module(&info, None)?)
 }

@@ -3,12 +3,23 @@ use anyhow::Result;
 use std::{mem::size_of, ptr::copy_nonoverlapping as memcpy};
 use vulkanalia::prelude::v1_0::*;
 
-pub unsafe fn create_vertex_buffer(instance: &Instance, device: &Device, data: &mut AppData) -> Result<()> {
+pub unsafe fn create_vertex_buffer(
+    instance: &Instance,
+    device: &Device,
+    data: &mut AppData,
+) -> Result<()> {
     // Create (staging)
 
     let size = (size_of::<Vertex>() * data.vertices.len()) as u64;
 
-    let (staging_buffer, staging_buffer_memory) = create_buffer(instance, device, data, size, vk::BufferUsageFlags::TRANSFER_SRC, vk::MemoryPropertyFlags::HOST_COHERENT | vk::MemoryPropertyFlags::HOST_VISIBLE)?;
+    let (staging_buffer, staging_buffer_memory) = create_buffer(
+        instance,
+        device,
+        data,
+        size,
+        vk::BufferUsageFlags::TRANSFER_SRC,
+        vk::MemoryPropertyFlags::HOST_COHERENT | vk::MemoryPropertyFlags::HOST_VISIBLE,
+    )?;
 
     // Copy (staging)
 
@@ -20,7 +31,14 @@ pub unsafe fn create_vertex_buffer(instance: &Instance, device: &Device, data: &
 
     // Create (vertex)
 
-    let (vertex_buffer, vertex_buffer_memory) = create_buffer(instance, device, data, size, vk::BufferUsageFlags::TRANSFER_DST | vk::BufferUsageFlags::VERTEX_BUFFER, vk::MemoryPropertyFlags::DEVICE_LOCAL)?;
+    let (vertex_buffer, vertex_buffer_memory) = create_buffer(
+        instance,
+        device,
+        data,
+        size,
+        vk::BufferUsageFlags::TRANSFER_DST | vk::BufferUsageFlags::VERTEX_BUFFER,
+        vk::MemoryPropertyFlags::DEVICE_LOCAL,
+    )?;
 
     data.vertex_buffer = vertex_buffer;
     data.vertex_buffer_memory = vertex_buffer_memory;

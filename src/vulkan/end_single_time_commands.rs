@@ -2,7 +2,11 @@ use crate::vulkan::AppData;
 use anyhow::Result;
 use vulkanalia::prelude::v1_0::*;
 
-pub unsafe fn end_single_time_commands(device: &Device, data: &AppData, command_buffer: vk::CommandBuffer) -> Result<()> {
+pub unsafe fn end_single_time_commands(
+    device: &Device,
+    data: &AppData,
+    command_buffer: vk::CommandBuffer,
+) -> Result<()> {
     // End
 
     device.end_command_buffer(command_buffer)?;

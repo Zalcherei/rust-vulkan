@@ -2,7 +2,11 @@ use crate::vulkan::{create_command_pool, AppData};
 use anyhow::Result;
 use vulkanalia::prelude::v1_0::*;
 
-pub unsafe fn create_command_pools(instance: &Instance, device: &Device, data: &mut AppData) -> Result<()> {
+pub unsafe fn create_command_pools(
+    instance: &Instance,
+    device: &Device,
+    data: &mut AppData,
+) -> Result<()> {
     // Global
 
     data.command_pool = create_command_pool(instance, device, data)?;

@@ -85,11 +85,11 @@ impl App {
         let in_flight_fence = self.data.in_flight_fences[self.frame];
 
         self.device
-            .wait_for_fences(&[in_flight_fence], true, u64::max_value())?;
+            .wait_for_fences(&[in_flight_fence], true, u64::MAX)?;
 
         let result = self.device.acquire_next_image_khr(
             self.data.swapchain,
-            u64::max_value(),
+            u64::MAX,
             self.data.image_available_semaphores[self.frame],
             vk::Fence::null(),
         );
@@ -133,8 +133,11 @@ impl App {
             .swapchains(swapchains)
             .image_indices(image_indices);
 
-        let result = self.device.queue_present_khr(self.data.present_queue, &present_info);
-        let changed = result == Ok(vk::SuccessCode::SUBOPTIMAL_KHR) || result == Err(vk::ErrorCode::OUT_OF_DATE_KHR);
+        let result = self
+            .device
+            .queue_present_khr(self.data.present_queue, &present_info);
+        let changed = result == Ok(vk::SuccessCode::SUBOPTIMAL_KHR)
+            || result == Err(vk::ErrorCode::OUT_OF_DATE_KHR);
         if self.resized || changed {
             self.resized = false;
             self.recreate_swapchain(window)?;
@@ -246,9 +249,18 @@ impl App {
     pub unsafe fn update_uniform_buffer(&self, image_index: usize) -> Result<()> {
         // MVP
 
-        let view = glm::look_at(&glm::vec3(6.0, 0.0, 2.0), &glm::vec3(0.0, 0.0, 0.0), &glm::vec3(0.0, 0.0, 1.0));
+        let view = glm::look_at(
+            &glm::vec3(6.0, 0.0, 2.0),
+            &glm::vec3(0.0, 0.0, 0.0),
+            &glm::vec3(0.0, 0.0, 1.0),
+        );
 
-        let mut proj = glm::perspective_rh_zo(self.data.swapchain_extent.width as f32 / self.data.swapchain_extent.height as f32, glm::radians(&glm::vec1(45.0))[0], 0.1, 10.0);
+        let mut proj = glm::perspective_rh_zo(
+            self.data.swapchain_extent.width as f32 / self.data.swapchain_extent.height as f32,
+            glm::radians(&glm::vec1(45.0))[0],
+            0.1,
+            10.0,
+        );
 
         proj[(1, 1)] *= -1.0;
 
@@ -256,11 +268,17 @@ impl App {
 
         // Copy
 
-        let memory = self.device.map_memory(self.data.uniform_buffers_memory[image_index], 0, size_of::<UniformBufferObject>() as u64, vk::MemoryMapFlags::empty())?;
+        let memory = self.device.map_memory(
+            self.data.uniform_buffers_memory[image_index],
+            0,
+            size_of::<UniformBufferObject>() as u64,
+            vk::MemoryMapFlags::empty(),
+        )?;
 
         memcpy(&ubo, memory.cast(), 1);
 
-        self.device.unmap_memory(self.data.uniform_buffers_memory[image_index]);
+        self.device
+            .unmap_memory(self.data.uniform_buffers_memory[image_index]);
 
         Ok(())
     }
@@ -290,25 +308,43 @@ impl App {
 
         self.destroy_swapchain();
 
-        self.data.in_flight_fences.iter().for_each(|f| self.device.destroy_fence(*f, None));
-        self.data.render_finished_semaphores.iter().for_each(|s| self.device.destroy_semaphore(*s, None));
-        self.data.image_available_semaphores.iter().for_each(|s| self.device.destroy_semaphore(*s, None));
-        self.data.command_pools.iter().for_each(|p| self.device.destroy_command_pool(*p, None));
+        self.data
+            .in_flight_fences
+            .iter()
+            .for_each(|f| self.device.destroy_fence(*f, None));
+        self.data
+            .render_finished_semaphores
+            .iter()
+            .for_each(|s| self.device.destroy_semaphore(*s, None));
+        self.data
+            .image_available_semaphores
+            .iter()
+            .for_each(|s| self.device.destroy_semaphore(*s, None));
+        self.data
+            .command_pools
+            .iter()
+            .for_each(|p| self.device.destroy_command_pool(*p, None));
         self.device.free_memory(self.data.index_buffer_memory, None);
         self.device.destroy_buffer(self.data.index_buffer, None);
-        self.device.free_memory(self.data.vertex_buffer_memory, None);
+        self.device
+            .free_memory(self.data.vertex_buffer_memory, None);
         self.device.destroy_buffer(self.data.vertex_buffer, None);
         self.device.destroy_sampler(self.data.texture_sampler, None);
-        self.device.destroy_image_view(self.data.texture_image_view, None);
-        self.device.free_memory(self.data.texture_image_memory, None);
+        self.device
+            .destroy_image_view(self.data.texture_image_view, None);
+        self.device
+            .free_memory(self.data.texture_image_memory, None);
         self.device.destroy_image(self.data.texture_image, None);
-        self.device.destroy_command_pool(self.data.command_pool, None);
-        self.device.destroy_descriptor_set_layout(self.data.descriptor_set_layout, None);
+        self.device
+            .destroy_command_pool(self.data.command_pool, None);
+        self.device
+            .destroy_descriptor_set_layout(self.data.descriptor_set_layout, None);
         self.device.destroy_device(None);
         self.instance.destroy_surface_khr(self.data.surface, None);
 
         if VALIDATION_ENABLED {
-            self.instance.destroy_debug_utils_messenger_ext(self.data.messenger, None);
+            self.instance
+                .destroy_debug_utils_messenger_ext(self.data.messenger, None);
         }
 
         self.instance.destroy_instance(None);

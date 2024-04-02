@@ -8,7 +8,14 @@ pub fn load_model(data: &mut AppData) -> Result<()> {
 
     let mut reader = BufReader::new(File::open("resources/viking_room.obj")?);
 
-    let (models, _) = tobj::load_obj_buf(&mut reader, &tobj::LoadOptions { triangulate: true, ..Default::default()}, |_| Ok(Default::default()))?;
+    let (models, _) = tobj::load_obj_buf(
+        &mut reader,
+        &tobj::LoadOptions {
+            triangulate: true,
+            ..Default::default()
+        },
+        |_| Ok(Default::default()),
+    )?;
 
     // Vertices / Indices
 
@@ -26,7 +33,10 @@ pub fn load_model(data: &mut AppData) -> Result<()> {
                     model.mesh.positions[pos_offset + 2],
                 ),
                 color: glm::vec3(1.0, 1.0, 1.0),
-                tex_coord: glm::vec2(model.mesh.texcoords[tex_coord_offset], 1.0 - model.mesh.texcoords[tex_coord_offset + 1])
+                tex_coord: glm::vec2(
+                    model.mesh.texcoords[tex_coord_offset],
+                    1.0 - model.mesh.texcoords[tex_coord_offset + 1],
+                ),
             };
 
             if let Some(index) = unique_vertices.get(&vertex) {
