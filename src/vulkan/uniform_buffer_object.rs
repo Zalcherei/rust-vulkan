@@ -1,8 +1,8 @@
-use nalgebra_glm as glm;
+use crate::vulkan::constants::Mat4;
 
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
 pub struct UniformBufferObject {
-    pub view: glm::Mat4,
-    pub proj: glm::Mat4,
+    pub view: Mat4,
+    pub proj: Mat4,
 }

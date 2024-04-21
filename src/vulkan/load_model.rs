@@ -1,12 +1,12 @@
 use crate::vulkan::{AppData, Vertex};
 use anyhow::Result;
-use nalgebra_glm as glm;
+use cgmath::{vec2, vec3};
 use std::{collections::HashMap, fs::File, io::BufReader};
 
 pub fn load_model(data: &mut AppData) -> Result<()> {
     // Model
 
-    let mut reader = BufReader::new(File::open("resources/viking_room.obj")?);
+    let mut reader = BufReader::new(File::open("src/resources/viking_room.obj").expect("Failed to read"));
 
     let (models, _) = tobj::load_obj_buf(
         &mut reader,
@@ -27,13 +27,13 @@ pub fn load_model(data: &mut AppData) -> Result<()> {
             let tex_coord_offset = (2 * index) as usize;
 
             let vertex = Vertex {
-                pos: glm::vec3(
+                pos: vec3(
                     model.mesh.positions[pos_offset],
                     model.mesh.positions[pos_offset + 1],
                     model.mesh.positions[pos_offset + 2],
                 ),
-                color: glm::vec3(1.0, 1.0, 1.0),
-                tex_coord: glm::vec2(
+                color: vec3(1.0, 1.0, 1.0),
+                tex_coord: vec2(
                     model.mesh.texcoords[tex_coord_offset],
                     1.0 - model.mesh.texcoords[tex_coord_offset + 1],
                 ),

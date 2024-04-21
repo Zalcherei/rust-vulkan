@@ -25,12 +25,7 @@ pub unsafe fn create_buffer(
 
     let memory_info = vk::MemoryAllocateInfo::builder()
         .allocation_size(requirements.size)
-        .memory_type_index(get_memory_type_index(
-            instance,
-            data,
-            properties,
-            requirements,
-        )?);
+        .memory_type_index(get_memory_type_index(instance, data, properties, requirements)?);
 
     let buffer_memory = device.allocate_memory(&memory_info, None)?;
 

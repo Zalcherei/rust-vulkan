@@ -6,15 +6,7 @@ pub unsafe fn create_swapchain_image_views(device: &Device, data: &mut AppData) 
     data.swapchain_image_views = data
         .swapchain_images
         .iter()
-        .map(|i| {
-            create_image_view(
-                device,
-                *i,
-                data.swapchain_format,
-                vk::ImageAspectFlags::COLOR,
-                1,
-            )
-        })
+        .map(|i| create_image_view(device, *i, data.swapchain_format, vk::ImageAspectFlags::COLOR, 1))
         .collect::<Result<Vec<_>, _>>()?;
 
     Ok(())

@@ -1,8 +1,6 @@
-use crate::vulkan::AppData;
+use crate::vulkan::{constants::MAX_FRAMES_IN_FLIGHT, AppData};
 use anyhow::Result;
 use vulkanalia::prelude::v1_0::*;
-
-const MAX_FRAMES_IN_FLIGHT: usize = 2;
 
 pub unsafe fn create_sync_objects(device: &Device, data: &mut AppData) -> Result<()> {
     let semaphore_info = vk::SemaphoreCreateInfo::builder();
@@ -15,11 +13,7 @@ pub unsafe fn create_sync_objects(device: &Device, data: &mut AppData) -> Result
             .push(device.create_semaphore(&semaphore_info, None)?);
     }
 
-    data.in_flight_fences = data
-        .swapchain_images
-        .iter()
-        .map(|_| vk::Fence::null())
-        .collect();
+    data.in_flight_fences = data.swapchain_images.iter().map(|_| vk::Fence::null()).collect();
 
     Ok(())
 }

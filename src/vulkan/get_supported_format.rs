@@ -13,8 +13,7 @@ pub unsafe fn get_supported_format(
         .iter()
         .cloned()
         .find(|f| {
-            let properties =
-                instance.get_physical_device_format_properties(data.physical_device, *f);
+            let properties = instance.get_physical_device_format_properties(data.physical_device, *f);
             match tiling {
                 vk::ImageTiling::LINEAR => properties.linear_tiling_features.contains(features),
                 vk::ImageTiling::OPTIMAL => properties.optimal_tiling_features.contains(features),

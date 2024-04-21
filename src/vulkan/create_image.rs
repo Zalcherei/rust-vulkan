@@ -41,12 +41,7 @@ pub unsafe fn create_image(
 
     let info = vk::MemoryAllocateInfo::builder()
         .allocation_size(requirements.size)
-        .memory_type_index(get_memory_type_index(
-            instance,
-            data,
-            properties,
-            requirements,
-        )?);
+        .memory_type_index(get_memory_type_index(instance, data, properties, requirements)?);
 
     let image_memory = device.allocate_memory(&info, None)?;
 

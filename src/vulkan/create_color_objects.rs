@@ -2,11 +2,7 @@ use crate::vulkan::{create_image, create_image_view, AppData};
 use anyhow::Result;
 use vulkanalia::prelude::v1_0::*;
 
-pub unsafe fn create_color_objects(
-    instance: &Instance,
-    device: &Device,
-    data: &mut AppData,
-) -> Result<()> {
+pub unsafe fn create_color_objects(instance: &Instance, device: &Device, data: &mut AppData) -> Result<()> {
     // Image + Image Memory
 
     let (color_image, color_image_memory) = create_image(

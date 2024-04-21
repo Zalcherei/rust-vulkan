@@ -11,14 +11,13 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-anyhow              = "1.0.81"
-lazy_static         = "1.4.0"
-log                 = "0.4.21"
-nalgebra-glm        = "0.18.0"
-png                 = "0.17.13"
-pretty_env_logger   = "0.5.0"
-thiserror           = "1.0.58"
-tobj                = { version = "4.0.1", features = ["log"] }
+anyhow              = "1"
+cgmath              = "0.18"
+log                 = "0.4"
+png                 = "0.17"
+pretty_env_logger   = "0.5"
+thiserror           = "1"
+tobj                = "4"
 vulkanalia          = { version = "=0.23.0", features = ["libloading", "provisional", "window"] }
-winit               = "0.29.0"
+winit               = "0.29"
 ```

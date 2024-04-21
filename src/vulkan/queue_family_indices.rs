@@ -9,11 +9,7 @@ pub struct QueueFamilyIndices {
 }
 
 impl QueueFamilyIndices {
-    pub unsafe fn get(
-        instance: &Instance,
-        data: &AppData,
-        physical_device: vk::PhysicalDevice,
-    ) -> Result<Self> {
+    pub unsafe fn get(instance: &Instance, data: &AppData, physical_device: vk::PhysicalDevice) -> Result<Self> {
         let properties = instance.get_physical_device_queue_family_properties(physical_device);
 
         let graphics = properties
@@ -23,11 +19,7 @@ impl QueueFamilyIndices {
 
         let mut present = None;
         for (index, properties) in properties.iter().enumerate() {
-            if instance.get_physical_device_surface_support_khr(
-                physical_device,
-                index as u32,
-                data.surface,
-            )? {
+            if instance.get_physical_device_surface_support_khr(physical_device, index as u32, data.surface)? {
                 present = Some(index as u32);
                 break;
             }

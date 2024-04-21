@@ -19,9 +19,7 @@ pub unsafe fn generate_mipmaps(
         .optimal_tiling_features
         .contains(vk::FormatFeatureFlags::SAMPLED_IMAGE_FILTER_LINEAR)
     {
-        return Err(anyhow!(
-            "Texture image format does not support linear blitting!"
-        ));
+        return Err(anyhow!("Texture image format does not support linear blitting!"));
     }
 
     // Mipmaps

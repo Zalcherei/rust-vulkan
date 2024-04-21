@@ -1,6 +1,5 @@
 use crate::vulkan::{
-    check_physical_device_extensions, AppData, QueueFamilyIndices, SuitabilityError,
-    SwapchainSupport,
+    check_physical_device_extensions, AppData, QueueFamilyIndices, SuitabilityError, SwapchainSupport,
 };
 use anyhow::{anyhow, Result};
 use vulkanalia::prelude::v1_0::*;

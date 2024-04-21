@@ -1,24 +1,12 @@
-use crate::vulkan::{AppData, QueueFamilyIndices};
+use crate::vulkan::{
+    constants::{DEVICE_EXTENSIONS, PORTABILITY_MACOS_VERSION, VALIDATION_ENABLED, VALIDATION_LAYER},
+    AppData, QueueFamilyIndices,
+};
 use anyhow::Result;
 use std::collections::HashSet;
-use vulkanalia::{prelude::v1_0::*, Version};
+use vulkanalia::prelude::v1_0::*;
 
-// Whether the validation layers should be enabled
-const VALIDATION_ENABLED: bool = cfg!(debug_assertion);
-// The name of the validation layers
-const VALIDATION_LAYER: vk::ExtensionName =
-    vk::ExtensionName::from_bytes(b"VK_LAYER_KHRONOS_validation");
-
-// The required device extensions
-const DEVICE_EXTENSIONS: &[vk::ExtensionName] = &[vk::KHR_SWAPCHAIN_EXTENSION.name];
-// the Vulkan SDK version that started requiring the portability subset extension for macOS
-pub const PORTABILITY_MACOS_VERSION: Version = Version::new(1, 3, 216);
-
-pub unsafe fn create_logical_device(
-    entry: &Entry,
-    instance: &Instance,
-    data: &mut AppData,
-) -> Result<Device> {
+pub unsafe fn create_logical_device(entry: &Entry, instance: &Instance, data: &mut AppData) -> Result<Device> {
     // Queue Create Infos
 
     let indices = QueueFamilyIndices::get(instance, data, data.physical_device)?;
@@ -47,10 +35,7 @@ pub unsafe fn create_logical_device(
 
     // Extensions
 
-    let mut extensions = DEVICE_EXTENSIONS
-        .iter()
-        .map(|n| n.as_ptr())
-        .collect::<Vec<_>>();
+    let mut extensions = DEVICE_EXTENSIONS.iter().map(|n| n.as_ptr()).collect::<Vec<_>>();
 
     // Required by Vulkan SDK on macOS since 1.3.216
     if cfg!(target_os = "macos") && entry.version()? >= PORTABILITY_MACOS_VERSION {

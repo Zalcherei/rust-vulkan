@@ -1,14 +1,13 @@
 use crate::vulkan::{
-    create_color_objects, create_command_buffers, create_command_pools, create_depth_objects,
-    create_descriptor_pool, create_descriptor_set_layout, create_descriptor_sets,
-    create_framebuffers, create_index_buffer, create_instance, create_logical_device,
-    create_pipeline, create_render_pass, create_swapchain, create_swapchain_image_views,
+    constants::{Mat4, MAX_FRAMES_IN_FLIGHT, VALIDATION_ENABLED},
+    create_color_objects, create_command_buffers, create_command_pools, create_depth_objects, create_descriptor_pool,
+    create_descriptor_set_layout, create_descriptor_sets, create_framebuffers, create_index_buffer, create_instance,
+    create_logical_device, create_pipeline, create_render_pass, create_swapchain, create_swapchain_image_views,
     create_sync_objects, create_texture_image, create_texture_image_view, create_texture_sampler,
-    create_uniform_buffers, create_vertex_buffer, load_model, pick_physical_device, AppData,
-    UniformBufferObject,
+    create_uniform_buffers, create_vertex_buffer, load_model, pick_physical_device, AppData, UniformBufferObject,
 };
 use anyhow::{anyhow, Result};
-use nalgebra_glm as glm;
+use cgmath::{point3, vec3, Deg};
 use std::{mem::size_of, ptr::copy_nonoverlapping as memcpy, time::Instant};
 use vulkanalia::{
     loader::{LibloadingLoader, LIBRARY},
@@ -19,11 +18,6 @@ use vulkanalia::{
     window as vk_window,
 };
 use winit::window::Window;
-
-// Whether the validation layers should be enabled
-const VALIDATION_ENABLED: bool = cfg!(debug_assertion);
-// The maximum number off frames that can be processed concurrently
-const MAX_FRAMES_IN_FLIGHT: usize = 2;
 
 // Our Vulkan app
 #[derive(Clone, Debug)]
@@ -84,8 +78,7 @@ impl App {
     pub unsafe fn render(&mut self, window: &Window) -> Result<()> {
         let in_flight_fence = self.data.in_flight_fences[self.frame];
 
-        self.device
-            .wait_for_fences(&[in_flight_fence], true, u64::MAX)?;
+        self.device.wait_for_fences(&[in_flight_fence], true, u64::MAX)?;
 
         let result = self.device.acquire_next_image_khr(
             self.data.swapchain,
@@ -133,11 +126,8 @@ impl App {
             .swapchains(swapchains)
             .image_indices(image_indices);
 
-        let result = self
-            .device
-            .queue_present_khr(self.data.present_queue, &present_info);
-        let changed = result == Ok(vk::SuccessCode::SUBOPTIMAL_KHR)
-            || result == Err(vk::ErrorCode::OUT_OF_DATE_KHR);
+        let result = self.device.queue_present_khr(self.data.present_queue, &present_info);
+        let changed = result == Ok(vk::SuccessCode::SUBOPTIMAL_KHR) || result == Err(vk::ErrorCode::OUT_OF_DATE_KHR);
         if self.resized || changed {
             self.resized = false;
             self.recreate_swapchain(window)?;
@@ -213,13 +203,14 @@ impl App {
         let y = (((model_index % 2) as f32) * 2.5) - 1.25;
         let z = (((model_index / 2) as f32) * -2.0) - 1.0;
 
-        let model = glm::translate(&glm::identity(), &glm::vec3(0.0, y, z));
-
         let time = self.start.elapsed().as_secs_f32();
 
-        let model = glm::rotate(&model, time * glm::radians(&glm::vec1(90.0))[0], &glm::vec3(0.0, 0.0, 1.0));
+        let model = Mat4::from_translation(vec3(0.0, y, z)) * Mat4::from_axis_angle(
+            vec3(0.0, 0.0, 1.0),
+            Deg(90.0) * time
+        );
 
-        let (_, model_bytes, _) = model.as_slice().align_to::<u8>();
+        let model_bytes = std::slice::from_raw_parts(&model as *const Mat4 as *const u8, size_of::<Mat4>());
 
         let opacity = (model_index + 1) as f32 * 0.25;
         let opacity_bytes = &opacity.to_ne_bytes()[..];
@@ -249,20 +240,27 @@ impl App {
     pub unsafe fn update_uniform_buffer(&self, image_index: usize) -> Result<()> {
         // MVP
 
-        let view = glm::look_at(
-            &glm::vec3(6.0, 0.0, 2.0),
-            &glm::vec3(0.0, 0.0, 0.0),
-            &glm::vec3(0.0, 0.0, 1.0),
+        let view = Mat4::look_at_rh(
+            point3::<f32>(6.0, 0.0, 2.0),
+            point3::<f32>(0.0, 0.0, 0.0),
+            vec3(0.0, 0.0, 1.0),
         );
 
-        let mut proj = glm::perspective_rh_zo(
-            self.data.swapchain_extent.width as f32 / self.data.swapchain_extent.height as f32,
-            glm::radians(&glm::vec1(45.0))[0],
-            0.1,
-            10.0,
+        #[rustfmt::skip]
+        let correction = Mat4::new(
+            1.0,  0.0,       0.0, 0.0,
+            0.0, -1.0,       0.0, 0.0,
+            0.0,  0.0, 1.0 / 2.0, 0.0,
+            0.0,  0.0, 1.0 / 2.0, 1.0,
         );
 
-        proj[(1, 1)] *= -1.0;
+        let proj = correction
+            * cgmath::perspective(
+                Deg(45.0),
+                self.data.swapchain_extent.width as f32 / self.data.swapchain_extent.height as f32,
+                0.1,
+                10.0,
+            );
 
         let ubo = UniformBufferObject { view, proj };
 
@@ -277,8 +275,7 @@ impl App {
 
         memcpy(&ubo, memory.cast(), 1);
 
-        self.device
-            .unmap_memory(self.data.uniform_buffers_memory[image_index]);
+        self.device.unmap_memory(self.data.uniform_buffers_memory[image_index]);
 
         Ok(())
     }
@@ -326,17 +323,13 @@ impl App {
             .for_each(|p| self.device.destroy_command_pool(*p, None));
         self.device.free_memory(self.data.index_buffer_memory, None);
         self.device.destroy_buffer(self.data.index_buffer, None);
-        self.device
-            .free_memory(self.data.vertex_buffer_memory, None);
+        self.device.free_memory(self.data.vertex_buffer_memory, None);
         self.device.destroy_buffer(self.data.vertex_buffer, None);
         self.device.destroy_sampler(self.data.texture_sampler, None);
-        self.device
-            .destroy_image_view(self.data.texture_image_view, None);
-        self.device
-            .free_memory(self.data.texture_image_memory, None);
+        self.device.destroy_image_view(self.data.texture_image_view, None);
+        self.device.free_memory(self.data.texture_image_memory, None);
         self.device.destroy_image(self.data.texture_image, None);
-        self.device
-            .destroy_command_pool(self.data.command_pool, None);
+        self.device.destroy_command_pool(self.data.command_pool, None);
         self.device
             .destroy_descriptor_set_layout(self.data.descriptor_set_layout, None);
         self.device.destroy_device(None);

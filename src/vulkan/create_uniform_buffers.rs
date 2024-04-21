@@ -3,11 +3,7 @@ use anyhow::Result;
 use std::mem::size_of;
 use vulkanalia::prelude::v1_0::*;
 
-pub unsafe fn create_uniform_buffers(
-    instance: &Instance,
-    device: &Device,
-    data: &mut AppData,
-) -> Result<()> {
+pub unsafe fn create_uniform_buffers(instance: &Instance, device: &Device, data: &mut AppData) -> Result<()> {
     data.uniform_buffers.clear();
     data.uniform_buffers_memory.clear();
 

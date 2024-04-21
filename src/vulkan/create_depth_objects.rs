@@ -2,11 +2,7 @@ use crate::vulkan::{create_image, create_image_view, get_depth_format, AppData};
 use anyhow::Result;
 use vulkanalia::prelude::v1_0::*;
 
-pub unsafe fn create_depth_objects(
-    instance: &Instance,
-    device: &Device,
-    data: &mut AppData,
-) -> Result<()> {
+pub unsafe fn create_depth_objects(instance: &Instance, device: &Device, data: &mut AppData) -> Result<()> {
     // Image + Image Memory
 
     let format = get_depth_format(instance, data)?;
@@ -30,13 +26,7 @@ pub unsafe fn create_depth_objects(
 
     // Image View
 
-    data.depth_image_view = create_image_view(
-        device,
-        data.depth_image,
-        format,
-        vk::ImageAspectFlags::DEPTH,
-        1,
-    )?;
+    data.depth_image_view = create_image_view(device, data.depth_image, format, vk::ImageAspectFlags::DEPTH, 1)?;
 
     Ok(())
 }

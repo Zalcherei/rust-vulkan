@@ -1,6 +1,6 @@
 use crate::vulkan::{
-    get_swapchain_extent, get_swapchain_present_mode, get_swapchain_surface_format, AppData,
-    QueueFamilyIndices, SwapchainSupport,
+    get_swapchain_extent, get_swapchain_present_mode, get_swapchain_surface_format, AppData, QueueFamilyIndices,
+    SwapchainSupport,
 };
 use anyhow::Result;
 use vulkanalia::{prelude::v1_0::*, vk::KhrSwapchainExtension};
@@ -25,9 +25,7 @@ pub unsafe fn create_swapchain(
     data.swapchain_extent = extent;
 
     let mut image_count = support.capabilities.min_image_count + 1;
-    if support.capabilities.max_image_count != 0
-        && image_count > support.capabilities.max_image_count
-    {
+    if support.capabilities.max_image_count != 0 && image_count > support.capabilities.max_image_count {
         image_count = support.capabilities.max_image_count;
     }
 

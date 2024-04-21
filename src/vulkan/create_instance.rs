@@ -1,23 +1,14 @@
-use crate::vulkan::{debug_callback, AppData};
+use crate::vulkan::{
+    constants::{PORTABILITY_MACOS_VERSION, VALIDATION_ENABLED, VALIDATION_LAYER},
+    debug_callback, AppData,
+};
 use anyhow::{anyhow, Result};
 use log::*;
 use std::collections::HashSet;
-use vulkanalia::{prelude::v1_0::*, vk::ExtDebugUtilsExtension, window as vk_window, Version};
+use vulkanalia::{prelude::v1_0::*, vk::ExtDebugUtilsExtension, window as vk_window};
 use winit::window::Window;
 
-// Whether the validation layers should be enabled
-const VALIDATION_ENABLED: bool = cfg!(debug_assertion);
-// The name of the validation layers
-const VALIDATION_LAYER: vk::ExtensionName =
-    vk::ExtensionName::from_bytes(b"VK_LAYER_KHRONOS_validation");
-// the Vulkan SDK version that started requiring the portability subset extension for macOS
-pub const PORTABILITY_MACOS_VERSION: Version = Version::new(1, 3, 216);
-
-pub unsafe fn create_instance(
-    window: &Window,
-    entry: &Entry,
-    data: &mut AppData,
-) -> Result<Instance> {
+pub unsafe fn create_instance(window: &Window, entry: &Entry, data: &mut AppData) -> Result<Instance> {
     // Application Info
 
     let application_info = vk::ApplicationInfo::builder()
@@ -55,11 +46,7 @@ pub unsafe fn create_instance(
     // Required by Vulkan SDK on macOS since 1.3.216
     let flags = if cfg!(target_os = "macos") && entry.version()? >= PORTABILITY_MACOS_VERSION {
         info!("Enabling extensions for macOS portability");
-        extensions.push(
-            vk::KHR_GET_PHYSICAL_DEVICE_PROPERTIES2_EXTENSION
-                .name
-                .as_ptr(),
-        );
+        extensions.push(vk::KHR_GET_PHYSICAL_DEVICE_PROPERTIES2_EXTENSION.name.as_ptr());
         extensions.push(vk::KHR_PORTABILITY_ENUMERATION_EXTENSION.name.as_ptr());
         vk::InstanceCreateFlags::ENUMERATE_PORTABILITY_KHR
     } else {

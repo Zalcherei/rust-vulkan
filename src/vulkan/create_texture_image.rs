@@ -1,19 +1,14 @@
 use crate::vulkan::{
-    copy_buffer_to_image, create_buffer, create_image, generate_mipmaps, transition_image_layout,
-    AppData,
+    copy_buffer_to_image, create_buffer, create_image, generate_mipmaps, transition_image_layout, AppData,
 };
 use anyhow::Result;
 use std::{fs::File, ptr::copy_nonoverlapping as memcpy};
 use vulkanalia::prelude::v1_0::*;
 
-pub unsafe fn create_texture_image(
-    instance: &Instance,
-    device: &Device,
-    data: &mut AppData,
-) -> Result<()> {
+pub unsafe fn create_texture_image(instance: &Instance, device: &Device, data: &mut AppData) -> Result<()> {
     // Load
 
-    let image = File::open("resources/viking_room.png")?;
+    let image = File::open("src/resources/viking_room.png")?;
 
     let decoder = png::Decoder::new(image);
     let mut reader = decoder.read_info()?;
@@ -60,9 +55,7 @@ pub unsafe fn create_texture_image(
         vk::SampleCountFlags::_1,
         vk::Format::R8G8B8A8_SRGB,
         vk::ImageTiling::OPTIMAL,
-        vk::ImageUsageFlags::SAMPLED
-            | vk::ImageUsageFlags::TRANSFER_DST
-            | vk::ImageUsageFlags::TRANSFER_SRC,
+        vk::ImageUsageFlags::SAMPLED | vk::ImageUsageFlags::TRANSFER_DST | vk::ImageUsageFlags::TRANSFER_SRC,
         vk::MemoryPropertyFlags::DEVICE_LOCAL,
     )?;
 
@@ -81,14 +74,7 @@ pub unsafe fn create_texture_image(
         data.mip_levels,
     )?;
 
-    copy_buffer_to_image(
-        device,
-        data,
-        staging_buffer,
-        data.texture_image,
-        width,
-        height,
-    )?;
+    copy_buffer_to_image(device, data, staging_buffer, data.texture_image, width, height)?;
 
     // Cleanup
 
