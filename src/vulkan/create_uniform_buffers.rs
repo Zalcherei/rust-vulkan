@@ -1,4 +1,4 @@
-use crate::vulkan::{create_buffer, AppData, UniformBufferObject};
+use super::{app_data::AppData, create_buffer::create_buffer, structures::UniformBufferObject};
 use anyhow::Result;
 use std::mem::size_of;
 use vulkanalia::prelude::v1_0::*;
@@ -15,7 +15,8 @@ pub unsafe fn create_uniform_buffers(instance: &Instance, device: &Device, data:
             size_of::<UniformBufferObject>() as u64,
             vk::BufferUsageFlags::UNIFORM_BUFFER,
             vk::MemoryPropertyFlags::HOST_COHERENT | vk::MemoryPropertyFlags::HOST_VISIBLE,
-        )?;
+        )
+        .unwrap();
 
         data.uniform_buffers.push(uniform_buffer);
         data.uniform_buffers_memory.push(uniform_buffer_memory);

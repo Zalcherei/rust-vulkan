@@ -1,16 +1,12 @@
-use anyhow::{anyhow, Result};
-use vulkanalia::prelude::v1_0::*;
+use anyhow::Result;
+use vulkanalia::{bytecode::Bytecode, prelude::v1_0::*};
 
 pub unsafe fn create_shader_module(device: &Device, bytecode: &[u8]) -> Result<vk::ShaderModule> {
-    let bytecode = Vec::<u8>::from(bytecode);
-    let (prefix, code, suffix) = bytecode.align_to::<u32>();
-    if !prefix.is_empty() || !suffix.is_empty() {
-        return Err(anyhow!("Shader bytecode is not properly aligned"));
-    }
+    let bytecode = Bytecode::new(bytecode).unwrap();
 
     let info = vk::ShaderModuleCreateInfo::builder()
-        .code_size(bytecode.len())
-        .code(code);
+        .code_size(bytecode.code_size())
+        .code(bytecode.code());
 
-    Ok(device.create_shader_module(&info, None)?)
+    Ok(device.create_shader_module(&info, None).unwrap())
 }

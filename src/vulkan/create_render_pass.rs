@@ -1,4 +1,4 @@
-use crate::vulkan::{get_depth_format, AppData};
+use super::{app_data::AppData, get_depth_format::get_depth_format};
 use anyhow::Result;
 use vulkanalia::prelude::v1_0::*;
 
@@ -16,7 +16,7 @@ pub unsafe fn create_render_pass(instance: &Instance, device: &Device, data: &mu
         .final_layout(vk::ImageLayout::COLOR_ATTACHMENT_OPTIMAL);
 
     let depth_stencil_attachment = vk::AttachmentDescription::builder()
-        .format(get_depth_format(instance, data)?)
+        .format(get_depth_format(instance, data).unwrap())
         .samples(data.msaa_samples)
         .load_op(vk::AttachmentLoadOp::CLEAR)
         .store_op(vk::AttachmentStoreOp::DONT_CARE)
@@ -77,7 +77,7 @@ pub unsafe fn create_render_pass(instance: &Instance, device: &Device, data: &mu
         .subpasses(subpasses)
         .dependencies(dependencies);
 
-    data.render_pass = device.create_render_pass(&info, None)?;
+    data.render_pass = device.create_render_pass(&info, None).unwrap();
 
     Ok(())
 }

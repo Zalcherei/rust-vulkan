@@ -1,4 +1,4 @@
-use crate::vulkan::{create_image, create_image_view, AppData};
+use super::{app_data::AppData, create_image::create_image, create_image_view::create_image_view};
 use anyhow::Result;
 use vulkanalia::prelude::v1_0::*;
 
@@ -17,7 +17,8 @@ pub unsafe fn create_color_objects(instance: &Instance, device: &Device, data: &
         vk::ImageTiling::OPTIMAL,
         vk::ImageUsageFlags::COLOR_ATTACHMENT | vk::ImageUsageFlags::TRANSIENT_ATTACHMENT,
         vk::MemoryPropertyFlags::DEVICE_LOCAL,
-    )?;
+    )
+    .unwrap();
 
     data.color_image = color_image;
     data.color_image_memory = color_image_memory;
@@ -30,7 +31,8 @@ pub unsafe fn create_color_objects(instance: &Instance, device: &Device, data: &
         data.swapchain_format,
         vk::ImageAspectFlags::COLOR,
         1,
-    )?;
+    )
+    .unwrap();
 
     Ok(())
 }

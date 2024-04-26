@@ -1,4 +1,7 @@
-use crate::vulkan::{begin_single_time_commands, end_single_time_commands, AppData};
+use super::{
+    app_data::AppData, begin_single_time_commands::begin_single_time_commands,
+    end_single_time_commands::end_single_time_commands,
+};
 use anyhow::{anyhow, Result};
 use vulkanalia::prelude::v1_0::*;
 
@@ -24,7 +27,7 @@ pub unsafe fn generate_mipmaps(
 
     // Mipmaps
 
-    let command_buffer = begin_single_time_commands(device, data)?;
+    let command_buffer = begin_single_time_commands(device, data).unwrap();
 
     let subresource = vk::ImageSubresourceRange::builder()
         .aspect_mask(vk::ImageAspectFlags::COLOR)
@@ -124,6 +127,12 @@ pub unsafe fn generate_mipmaps(
         }
     }
 
+    barrier.subresource_range.base_mip_level = mip_levels - 1;
+    barrier.old_layout = vk::ImageLayout::TRANSFER_DST_OPTIMAL;
+    barrier.new_layout = vk::ImageLayout::SHADER_READ_ONLY_OPTIMAL;
+    barrier.src_access_mask = vk::AccessFlags::TRANSFER_WRITE;
+    barrier.dst_access_mask = vk::AccessFlags::SHADER_READ;
+
     device.cmd_pipeline_barrier(
         command_buffer,
         vk::PipelineStageFlags::TRANSFER,
@@ -134,7 +143,7 @@ pub unsafe fn generate_mipmaps(
         &[barrier],
     );
 
-    end_single_time_commands(device, data, command_buffer)?;
+    end_single_time_commands(device, data, command_buffer).unwrap();
 
     Ok(())
 }

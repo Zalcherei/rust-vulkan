@@ -1,4 +1,4 @@
-use crate::vulkan::{copy_buffer, create_buffer, AppData};
+use super::{app_data::AppData, copy_buffer::copy_buffer, create_buffer::create_buffer};
 use anyhow::Result;
 use std::{mem::size_of, ptr::copy_nonoverlapping as memcpy};
 use vulkanalia::prelude::v1_0::*;
@@ -15,11 +15,14 @@ pub unsafe fn create_index_buffer(instance: &Instance, device: &Device, data: &m
         size,
         vk::BufferUsageFlags::TRANSFER_SRC,
         vk::MemoryPropertyFlags::HOST_COHERENT | vk::MemoryPropertyFlags::HOST_VISIBLE,
-    )?;
+    )
+    .unwrap();
 
     // Copy (staging)
 
-    let memory = device.map_memory(staging_buffer_memory, 0, size, vk::MemoryMapFlags::empty())?;
+    let memory = device
+        .map_memory(staging_buffer_memory, 0, size, vk::MemoryMapFlags::empty())
+        .unwrap();
 
     memcpy(data.indices.as_ptr(), memory.cast(), data.indices.len());
 
@@ -34,14 +37,15 @@ pub unsafe fn create_index_buffer(instance: &Instance, device: &Device, data: &m
         size,
         vk::BufferUsageFlags::TRANSFER_DST | vk::BufferUsageFlags::INDEX_BUFFER,
         vk::MemoryPropertyFlags::DEVICE_LOCAL,
-    )?;
+    )
+    .unwrap();
 
     data.index_buffer = index_buffer;
     data.index_buffer_memory = index_buffer_memory;
 
     // Copy (index)
 
-    copy_buffer(device, data, staging_buffer, index_buffer, size)?;
+    copy_buffer(device, data, staging_buffer, index_buffer, size).unwrap();
 
     // Cleanup
 

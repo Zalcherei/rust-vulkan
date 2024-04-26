@@ -1,4 +1,4 @@
-use crate::vulkan::{AppData, UniformBufferObject};
+use super::{app_data::AppData, structures::UniformBufferObject};
 use anyhow::Result;
 use std::mem::size_of;
 use vulkanalia::prelude::v1_0::*;
@@ -11,7 +11,7 @@ pub unsafe fn create_descriptor_sets(device: &Device, data: &mut AppData) -> Res
         .descriptor_pool(data.descriptor_pool)
         .set_layouts(&layouts);
 
-    data.descriptor_sets = device.allocate_descriptor_sets(&info)?;
+    data.descriptor_sets = device.allocate_descriptor_sets(&info).unwrap();
 
     // Update
 

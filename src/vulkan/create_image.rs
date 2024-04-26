@@ -1,4 +1,4 @@
-use crate::vulkan::{get_memory_type_index, AppData};
+use super::{app_data::AppData, get_memory_type_index::get_memory_type_index};
 use anyhow::Result;
 use vulkanalia::prelude::v1_0::*;
 
@@ -33,7 +33,7 @@ pub unsafe fn create_image(
         .sharing_mode(vk::SharingMode::EXCLUSIVE)
         .samples(samples);
 
-    let image = device.create_image(&info, None)?;
+    let image = device.create_image(&info, None).unwrap();
 
     // Memory
 
@@ -41,11 +41,11 @@ pub unsafe fn create_image(
 
     let info = vk::MemoryAllocateInfo::builder()
         .allocation_size(requirements.size)
-        .memory_type_index(get_memory_type_index(instance, data, properties, requirements)?);
+        .memory_type_index(get_memory_type_index(instance, data, properties, requirements).unwrap());
 
-    let image_memory = device.allocate_memory(&info, None)?;
+    let image_memory = device.allocate_memory(&info, None).unwrap();
 
-    device.bind_image_memory(image, image_memory, 0)?;
+    device.bind_image_memory(image, image_memory, 0).unwrap();
 
     Ok((image, image_memory))
 }

@@ -1,4 +1,4 @@
-use crate::vulkan::AppData;
+use super::app_data::AppData;
 use anyhow::Result;
 use vulkanalia::prelude::v1_0::*;
 
@@ -9,15 +9,17 @@ pub unsafe fn end_single_time_commands(
 ) -> Result<()> {
     // End
 
-    device.end_command_buffer(command_buffer)?;
+    device.end_command_buffer(command_buffer).unwrap();
 
     // Submit
 
     let command_buffers = &[command_buffer];
     let info = vk::SubmitInfo::builder().command_buffers(command_buffers);
 
-    device.queue_submit(data.graphics_queue, &[info], vk::Fence::null())?;
-    device.queue_wait_idle(data.graphics_queue)?;
+    device
+        .queue_submit(data.graphics_queue, &[info], vk::Fence::null())
+        .unwrap();
+    device.queue_wait_idle(data.graphics_queue).unwrap();
 
     // Cleanup
 

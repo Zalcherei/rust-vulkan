@@ -1,7 +1,9 @@
+use super::{
+    app_data::AppData, begin_single_time_commands::begin_single_time_commands,
+    end_single_time_commands::end_single_time_commands,
+};
 use anyhow::{anyhow, Result};
 use vulkanalia::prelude::v1_0::*;
-
-use crate::vulkan::{begin_single_time_commands, end_single_time_commands, AppData};
 
 pub unsafe fn transition_image_layout(
     device: &Device,
@@ -28,7 +30,7 @@ pub unsafe fn transition_image_layout(
         _ => return Err(anyhow!("Unsupported image layout transition!")),
     };
 
-    let command_buffer = begin_single_time_commands(device, data)?;
+    let command_buffer = begin_single_time_commands(device, data).unwrap();
 
     let subresource = vk::ImageSubresourceRange::builder()
         .aspect_mask(vk::ImageAspectFlags::COLOR)
@@ -57,7 +59,7 @@ pub unsafe fn transition_image_layout(
         &[barrier],
     );
 
-    end_single_time_commands(device, data, command_buffer)?;
+    end_single_time_commands(device, data, command_buffer).unwrap();
 
     Ok(())
 }

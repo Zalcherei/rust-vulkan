@@ -1,4 +1,4 @@
-use crate::vulkan::AppData;
+use super::app_data::AppData;
 use anyhow::{anyhow, Result};
 use vulkanalia::prelude::v1_0::*;
 
@@ -15,5 +15,5 @@ pub unsafe fn get_memory_type_index(
             let memory_type = memory.memory_types[*i as usize];
             suitable && memory_type.property_flags.contains(properties)
         })
-        .ok_or_else(|| anyhow!("Failed to find suitable memory type"))
+        .ok_or_else(|| anyhow!("Failed to find suitable memory type."))
 }

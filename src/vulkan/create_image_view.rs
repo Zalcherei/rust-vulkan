@@ -21,5 +21,5 @@ pub unsafe fn create_image_view(
         .format(format)
         .subresource_range(subresource_range);
 
-    Ok(device.create_image_view(&info, None)?)
+    Ok(device.create_image_view(&info, None).unwrap())
 }

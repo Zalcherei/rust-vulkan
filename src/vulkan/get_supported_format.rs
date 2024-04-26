@@ -1,4 +1,4 @@
-use crate::vulkan::AppData;
+use super::app_data::AppData;
 use anyhow::{anyhow, Result};
 use vulkanalia::prelude::v1_0::*;
 
@@ -20,5 +20,5 @@ pub unsafe fn get_supported_format(
                 _ => false,
             }
         })
-        .ok_or_else(|| anyhow!("Ffailed to find supported format!"))
+        .ok_or_else(|| anyhow!("Failed to find supported format!"))
 }

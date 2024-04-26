@@ -1,6 +1,7 @@
-use crate::vulkan::{
+use super::{
+    app_data::AppData,
     constants::{DEVICE_EXTENSIONS, PORTABILITY_MACOS_VERSION, VALIDATION_ENABLED, VALIDATION_LAYER},
-    AppData, QueueFamilyIndices,
+    structures::QueueFamilyIndices,
 };
 use anyhow::Result;
 use std::collections::HashSet;
@@ -9,7 +10,7 @@ use vulkanalia::prelude::v1_0::*;
 pub unsafe fn create_logical_device(entry: &Entry, instance: &Instance, data: &mut AppData) -> Result<Device> {
     // Queue Create Infos
 
-    let indices = QueueFamilyIndices::get(instance, data, data.physical_device)?;
+    let indices = QueueFamilyIndices::get(instance, data, data.physical_device).unwrap();
 
     let mut unique_indices = HashSet::new();
     unique_indices.insert(indices.graphics);
@@ -37,9 +38,9 @@ pub unsafe fn create_logical_device(entry: &Entry, instance: &Instance, data: &m
 
     let mut extensions = DEVICE_EXTENSIONS.iter().map(|n| n.as_ptr()).collect::<Vec<_>>();
 
-    // Required by Vulkan SDK on macOS since 1.3.216
-    if cfg!(target_os = "macos") && entry.version()? >= PORTABILITY_MACOS_VERSION {
-        extensions.push(vk::KHR_PORTABILITY_ENUMERATION_EXTENSION.name.as_ptr());
+    // Required by Vulkan SDK on macOS since 1.3.216.
+    if cfg!(target_os = "macos") && entry.version().unwrap() >= PORTABILITY_MACOS_VERSION {
+        extensions.push(vk::KHR_PORTABILITY_SUBSET_EXTENSION.name.as_ptr());
     }
 
     // Features
@@ -56,7 +57,7 @@ pub unsafe fn create_logical_device(entry: &Entry, instance: &Instance, data: &m
         .enabled_extension_names(&extensions)
         .enabled_features(&features);
 
-    let device = instance.create_device(data.physical_device, &info, None)?;
+    let device = instance.create_device(data.physical_device, &info, None).unwrap();
 
     // Queues
 

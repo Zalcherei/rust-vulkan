@@ -1,4 +1,4 @@
-use crate::vulkan::{get_supported_format, AppData};
+use super::{app_data::AppData, get_supported_format::get_supported_format};
 use anyhow::Result;
 use vulkanalia::prelude::v1_0::*;
 

@@ -1,6 +1,7 @@
-use crate::vulkan::{create_shader_module, AppData, Vertex};
 use anyhow::Result;
 use vulkanalia::prelude::v1_0::*;
+
+use super::{app_data::AppData, create_shader_module::create_shader_module, structures::Vertex};
 
 pub unsafe fn create_pipeline(device: &Device, data: &mut AppData) -> Result<()> {
     // Stages
@@ -8,8 +9,8 @@ pub unsafe fn create_pipeline(device: &Device, data: &mut AppData) -> Result<()>
     let vert = include_bytes!("../shaders/vert.spv");
     let frag = include_bytes!("../shaders/frag.spv");
 
-    let vert_shader_module = create_shader_module(device, &vert[..])?;
-    let frag_shader_module = create_shader_module(device, &frag[..])?;
+    let vert_shader_module = create_shader_module(device, &vert[..]).unwrap();
+    let frag_shader_module = create_shader_module(device, &frag[..]).unwrap();
 
     let vert_stage = vk::PipelineShaderStageCreateInfo::builder()
         .stage(vk::ShaderStageFlags::VERTEX)
@@ -21,7 +22,7 @@ pub unsafe fn create_pipeline(device: &Device, data: &mut AppData) -> Result<()>
         .module(frag_shader_module)
         .name(b"main\0");
 
-    // Vertex Input state
+    // Vertex Input State
 
     let binding_descriptions = &[Vertex::binding_description()];
     let attribute_descriptions = Vertex::attribute_descriptions();
@@ -121,7 +122,7 @@ pub unsafe fn create_pipeline(device: &Device, data: &mut AppData) -> Result<()>
         .set_layouts(set_layouts)
         .push_constant_ranges(push_constant_ranges);
 
-    data.pipeline_layout = device.create_pipeline_layout(&layout_info, None)?;
+    data.pipeline_layout = device.create_pipeline_layout(&layout_info, None).unwrap();
 
     // Create
 
@@ -140,7 +141,8 @@ pub unsafe fn create_pipeline(device: &Device, data: &mut AppData) -> Result<()>
         .subpass(0);
 
     data.pipeline = device
-        .create_graphics_pipelines(vk::PipelineCache::null(), &[info], None)?
+        .create_graphics_pipelines(vk::PipelineCache::null(), &[info], None)
+        .unwrap()
         .0[0];
 
     // Cleanup

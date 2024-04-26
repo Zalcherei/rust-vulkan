@@ -1,4 +1,4 @@
-use crate::vulkan::AppData;
+use super::app_data::AppData;
 use anyhow::Result;
 use vulkanalia::prelude::v1_0::*;
 
@@ -10,13 +10,13 @@ pub unsafe fn begin_single_time_commands(device: &Device, data: &AppData) -> Res
         .command_pool(data.command_pool)
         .command_buffer_count(1);
 
-    let command_buffer = device.allocate_command_buffers(&info)?[0];
+    let command_buffer = device.allocate_command_buffers(&info).unwrap()[0];
 
     // Begin
 
     let info = vk::CommandBufferBeginInfo::builder().flags(vk::CommandBufferUsageFlags::ONE_TIME_SUBMIT);
 
-    device.begin_command_buffer(command_buffer, &info)?;
+    device.begin_command_buffer(command_buffer, &info).unwrap();
 
     Ok(command_buffer)
 }

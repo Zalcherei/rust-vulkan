@@ -1,4 +1,7 @@
-use crate::vulkan::{begin_single_time_commands, end_single_time_commands, AppData};
+use super::{
+    app_data::AppData, begin_single_time_commands::begin_single_time_commands,
+    end_single_time_commands::end_single_time_commands,
+};
 use anyhow::Result;
 use vulkanalia::prelude::v1_0::*;
 
@@ -10,7 +13,7 @@ pub unsafe fn copy_buffer_to_image(
     width: u32,
     height: u32,
 ) -> Result<()> {
-    let command_buffer = begin_single_time_commands(device, data)?;
+    let command_buffer = begin_single_time_commands(device, data).unwrap();
 
     let subresource = vk::ImageSubresourceLayers::builder()
         .aspect_mask(vk::ImageAspectFlags::COLOR)
@@ -38,7 +41,7 @@ pub unsafe fn copy_buffer_to_image(
         &[region],
     );
 
-    end_single_time_commands(device, data, command_buffer)?;
+    end_single_time_commands(device, data, command_buffer).unwrap();
 
     Ok(())
 }

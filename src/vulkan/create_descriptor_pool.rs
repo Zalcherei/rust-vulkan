@@ -1,4 +1,4 @@
-use crate::vulkan::AppData;
+use super::app_data::AppData;
 use anyhow::Result;
 use vulkanalia::prelude::v1_0::*;
 
@@ -16,7 +16,7 @@ pub unsafe fn create_descriptor_pool(device: &Device, data: &mut AppData) -> Res
         .pool_sizes(pool_sizes)
         .max_sets(data.swapchain_images.len() as u32);
 
-    data.descriptor_pool = device.create_descriptor_pool(&info, None)?;
+    data.descriptor_pool = device.create_descriptor_pool(&info, None).unwrap();
 
     Ok(())
 }

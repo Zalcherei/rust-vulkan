@@ -1,4 +1,4 @@
-use crate::vulkan::AppData;
+use super::app_data::AppData;
 use anyhow::Result;
 use vulkanalia::prelude::v1_0::*;
 
@@ -18,7 +18,7 @@ pub unsafe fn create_descriptor_set_layout(device: &Device, data: &mut AppData) 
     let bindings = &[ubo_binding, sampler_binding];
     let info = vk::DescriptorSetLayoutCreateInfo::builder().bindings(bindings);
 
-    data.descriptor_set_layout = device.create_descriptor_set_layout(&info, None)?;
+    data.descriptor_set_layout = device.create_descriptor_set_layout(&info, None).unwrap();
 
     Ok(())
 }

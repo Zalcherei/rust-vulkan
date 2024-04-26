@@ -1,4 +1,4 @@
-use crate::vulkan::{AppData, Vertex};
+use super::{app_data::AppData, structures::Vertex};
 use anyhow::Result;
 use cgmath::{vec2, vec3};
 use std::{collections::HashMap, fs::File, io::BufReader};
@@ -6,7 +6,7 @@ use std::{collections::HashMap, fs::File, io::BufReader};
 pub fn load_model(data: &mut AppData) -> Result<()> {
     // Model
 
-    let mut reader = BufReader::new(File::open("src/resources/viking_room.obj").expect("Failed to read"));
+    let mut reader = BufReader::new(File::open("./src/resources/viking_room.obj").unwrap());
 
     let (models, _) = tobj::load_obj_buf(
         &mut reader,
@@ -15,7 +15,8 @@ pub fn load_model(data: &mut AppData) -> Result<()> {
             ..Default::default()
         },
         |_| Ok(Default::default()),
-    )?;
+    )
+    .unwrap();
 
     // Vertices / Indices
 

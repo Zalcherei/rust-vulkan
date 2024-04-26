@@ -7,9 +7,8 @@
 )]
 
 mod vulkan;
-
-use crate::vulkan::App;
 use anyhow::Result;
+use vulkan::structures::App;
 use winit::{
     dpi::LogicalSize,
     event::{ElementState, Event, WindowEvent},
@@ -24,24 +23,23 @@ fn main() -> Result<()> {
 
     // Window
 
-    let event_loop = EventLoop::new()?;
+    let event_loop = EventLoop::new().unwrap();
     let window = WindowBuilder::new()
-        .with_title("Vulkan Tutorial (rust)")
+        .with_title("Vulkan Tutorial (Rust)")
         .with_inner_size(LogicalSize::new(1024, 768))
-        .build(&event_loop)?;
+        .build(&event_loop).unwrap();
 
     // App
 
-    let mut app = unsafe { App::create(&window)? };
+    let mut app = unsafe { App::create(&window).unwrap() };
     let mut minimized = false;
-
-    event_loop.run(move |event, control_flow| {
+    event_loop.run(move |event, elwt| {
         match event {
             // Request a redraw when all events were processed.
             Event::AboutToWait => window.request_redraw(),
             Event::WindowEvent { event, .. } => match event {
                 // Render a frame if our Vulkan app is not being destroyed.
-                WindowEvent::RedrawRequested if !control_flow.exiting() && !minimized => {
+                WindowEvent::RedrawRequested if !elwt.exiting() && !minimized => {
                     unsafe { app.render(&window) }.unwrap();
                 },
                 // Mark the window as having been resized.
@@ -55,7 +53,7 @@ fn main() -> Result<()> {
                 }
                 // Destroy our Vulkan app.
                 WindowEvent::CloseRequested => {
-                    control_flow.exit();
+                    elwt.exit();
                     unsafe { app.destroy(); }
                 }
                 // Handle keyboard events.
@@ -72,7 +70,7 @@ fn main() -> Result<()> {
             }
             _ => {}
         }
-    })?;
+    }).unwrap();
 
     Ok(())
 }
