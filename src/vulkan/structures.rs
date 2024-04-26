@@ -1,29 +1,20 @@
 use super::{
-    app_data::AppData,
+    buffers::{create_index_buffer, create_uniform_buffers, create_vertex_buffer},
+    color_objects::create_color_objects,
+    command_buffers::create_command_buffers,
+    command_pool::create_command_pools,
     constants::{Mat4, Vec2, Vec3, MAX_FRAMES_IN_FLIGHT, VALIDATION_ENABLED},
-    create_color_objects::create_color_objects,
-    create_command_buffers::create_command_buffers,
-    create_command_pools::create_command_pools,
-    create_depth_objects::create_depth_objects,
-    create_descriptor_pool::create_descriptor_pool,
-    create_descriptor_set_layout::create_descriptor_set_layout,
-    create_descriptor_sets::create_descriptor_sets,
-    create_framebuffers::create_framebuffers,
-    create_index_buffer::create_index_buffer,
-    create_instance::create_instance,
-    create_logical_device::create_logical_device,
-    create_pipeline::create_pipeline,
-    create_render_pass::create_render_pass,
-    create_swapchain::create_swapchain,
-    create_swapchain_image_views::create_swapchain_image_views,
-    create_sync_objects::create_sync_objects,
-    create_texture_image::create_texture_image,
-    create_texture_image_view::create_texture_image_view,
-    create_texture_sampler::create_texture_sampler,
-    create_uniform_buffers::create_uniform_buffers,
-    create_vertex_buffer::create_vertex_buffer,
-    load_model::load_model,
-    pick_physical_device::pick_physical_device,
+    depth_objects::create_depth_objects,
+    descriptors::{create_descriptor_pool, create_descriptor_sets},
+    framebuffers::create_framebuffers,
+    instance::create_instance,
+    logical_device::create_logical_device,
+    model::load_model,
+    physical_device::pick_physical_device,
+    pipeline::{create_descriptor_set_layout, create_pipeline, create_render_pass},
+    swapchain::{create_swapchain, create_swapchain_image_views},
+    sync_objects::create_sync_objects,
+    texture::{create_texture_image, create_texture_image_view, create_texture_sampler},
 };
 use anyhow::{anyhow, Result};
 use cgmath::{point3, vec3, Deg};
@@ -548,4 +539,69 @@ impl App {
         self.data.swapchain_image_views.iter().for_each(|v| self.device.destroy_image_view(*v, None));
         self.device.destroy_swapchain_khr(self.data.swapchain, None);
     }
+}
+
+// The Vulkan handles and associated properties used by our Vulkan app.
+#[derive(Clone, Debug, Default)]
+pub struct AppData {
+    // Debug
+    pub messenger: vk::DebugUtilsMessengerEXT,
+    // Surface
+    pub surface: vk::SurfaceKHR,
+    // Physical Device / Logical Device
+    pub physical_device: vk::PhysicalDevice,
+    pub msaa_samples: vk::SampleCountFlags,
+    pub graphics_queue: vk::Queue,
+    pub present_queue: vk::Queue,
+    // Swapchain
+    pub swapchain_format: vk::Format,
+    pub swapchain_extent: vk::Extent2D,
+    pub swapchain: vk::SwapchainKHR,
+    pub swapchain_images: Vec<vk::Image>,
+    pub swapchain_image_views: Vec<vk::ImageView>,
+    // Pipeline
+    pub render_pass: vk::RenderPass,
+    pub descriptor_set_layout: vk::DescriptorSetLayout,
+    pub pipeline_layout: vk::PipelineLayout,
+    pub pipeline: vk::Pipeline,
+    // Framebuffers
+    pub framebuffers: Vec<vk::Framebuffer>,
+    // Command Pool
+    pub command_pool: vk::CommandPool,
+    // Color
+    pub color_image: vk::Image,
+    pub color_image_memory: vk::DeviceMemory,
+    pub color_image_view: vk::ImageView,
+    // Depth
+    pub depth_image: vk::Image,
+    pub depth_image_memory: vk::DeviceMemory,
+    pub depth_image_view: vk::ImageView,
+    // Texture
+    pub mip_levels: u32,
+    pub texture_image: vk::Image,
+    pub texture_image_memory: vk::DeviceMemory,
+    pub texture_image_view: vk::ImageView,
+    pub texture_sampler: vk::Sampler,
+    // Model
+    pub vertices: Vec<Vertex>,
+    pub indices: Vec<u32>,
+    // Buffers
+    pub vertex_buffer: vk::Buffer,
+    pub vertex_buffer_memory: vk::DeviceMemory,
+    pub index_buffer: vk::Buffer,
+    pub index_buffer_memory: vk::DeviceMemory,
+    pub uniform_buffers: Vec<vk::Buffer>,
+    pub uniform_buffers_memory: Vec<vk::DeviceMemory>,
+    // Descriptors
+    pub descriptor_pool: vk::DescriptorPool,
+    pub descriptor_sets: Vec<vk::DescriptorSet>,
+    // Command Buffers
+    pub command_pools: Vec<vk::CommandPool>,
+    pub command_buffers: Vec<vk::CommandBuffer>,
+    pub secondary_command_buffers: Vec<Vec<vk::CommandBuffer>>,
+    // Sync Objects
+    pub image_available_semaphores: Vec<vk::Semaphore>,
+    pub render_finished_semaphores: Vec<vk::Semaphore>,
+    pub in_flight_fences: Vec<vk::Fence>,
+    pub images_in_flight: Vec<vk::Fence>,
 }

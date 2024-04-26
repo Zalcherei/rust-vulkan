@@ -1,6 +1,10 @@
-use super::{app_data::AppData, constants::MAX_FRAMES_IN_FLIGHT};
+use super::{constants::MAX_FRAMES_IN_FLIGHT, structures::AppData};
 use anyhow::Result;
 use vulkanalia::prelude::v1_0::*;
+
+//================================================
+// Sync Objects
+//================================================
 
 pub unsafe fn create_sync_objects(device: &Device, data: &mut AppData) -> Result<()> {
     let semaphore_info = vk::SemaphoreCreateInfo::builder();

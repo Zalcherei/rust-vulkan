@@ -1,6 +1,10 @@
-use super::app_data::AppData;
+use super::structures::AppData;
 use anyhow::Result;
 use vulkanalia::prelude::v1_0::*;
+
+//================================================
+// Framebuffers
+//================================================
 
 pub unsafe fn create_framebuffers(device: &Device, data: &mut AppData) -> Result<()> {
     data.framebuffers = data

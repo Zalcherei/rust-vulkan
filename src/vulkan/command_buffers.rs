@@ -1,6 +1,10 @@
-use super::app_data::AppData;
+use super::structures::AppData;
 use anyhow::Result;
 use vulkanalia::prelude::v1_0::*;
+
+//================================================
+// Command Buffers
+//================================================
 
 pub unsafe fn create_command_buffers(device: &Device, data: &mut AppData) -> Result<()> {
     let num_images = data.swapchain_images.len();

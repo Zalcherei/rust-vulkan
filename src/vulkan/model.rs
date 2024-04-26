@@ -1,12 +1,16 @@
-use super::{app_data::AppData, structures::Vertex};
+use super::structures::{AppData, Vertex};
 use anyhow::Result;
 use cgmath::{vec2, vec3};
 use std::{collections::HashMap, fs::File, io::BufReader};
 
+//================================================
+// Model
+//================================================
+
 pub fn load_model(data: &mut AppData) -> Result<()> {
     // Model
 
-    let mut reader = BufReader::new(File::open("./src/resources/viking_room.obj").unwrap());
+    let mut reader = BufReader::new(File::open("src/resources/viking_room.obj").unwrap());
 
     let (models, _) = tobj::load_obj_buf(
         &mut reader,

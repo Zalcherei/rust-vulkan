@@ -1,6 +1,13 @@
-use super::{app_data::AppData, create_image::create_image, create_image_view::create_image_view};
+use super::{
+    shared_images::{create_image, create_image_view},
+    structures::AppData,
+};
 use anyhow::Result;
 use vulkanalia::prelude::v1_0::*;
+
+//================================================
+// Color Objects
+//================================================
 
 pub unsafe fn create_color_objects(instance: &Instance, device: &Device, data: &mut AppData) -> Result<()> {
     // Image + Image Memory

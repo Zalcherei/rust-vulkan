@@ -1,6 +1,13 @@
-use super::{app_data::AppData, get_memory_type_index::get_memory_type_index};
+use super::{
+    shared_other::{begin_single_time_commands, end_single_time_commands, get_memory_type_index},
+    structures::AppData,
+};
 use anyhow::Result;
 use vulkanalia::prelude::v1_0::*;
+
+//================================================
+// Shared (Buffers)
+//================================================
 
 pub unsafe fn create_buffer(
     instance: &Instance,
@@ -32,4 +39,21 @@ pub unsafe fn create_buffer(
     device.bind_buffer_memory(buffer, buffer_memory, 0).unwrap();
 
     Ok((buffer, buffer_memory))
+}
+
+pub unsafe fn copy_buffer(
+    device: &Device,
+    data: &AppData,
+    source: vk::Buffer,
+    destination: vk::Buffer,
+    size: vk::DeviceSize,
+) -> Result<()> {
+    let command_buffer = begin_single_time_commands(device, data).unwrap();
+
+    let regions = vk::BufferCopy::builder().size(size);
+    device.cmd_copy_buffer(command_buffer, source, destination, &[regions]);
+
+    end_single_time_commands(device, data, command_buffer).unwrap();
+
+    Ok(())
 }

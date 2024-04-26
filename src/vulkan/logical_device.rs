@@ -1,11 +1,14 @@
 use super::{
-    app_data::AppData,
     constants::{DEVICE_EXTENSIONS, PORTABILITY_MACOS_VERSION, VALIDATION_ENABLED, VALIDATION_LAYER},
-    structures::QueueFamilyIndices,
+    structures::{AppData, QueueFamilyIndices},
 };
 use anyhow::Result;
 use std::collections::HashSet;
 use vulkanalia::prelude::v1_0::*;
+
+//================================================
+// Logical Device
+//================================================
 
 pub unsafe fn create_logical_device(entry: &Entry, instance: &Instance, data: &mut AppData) -> Result<Device> {
     // Queue Create Infos

@@ -1,13 +1,16 @@
 use super::{
-    app_data::AppData,
     constants::{PORTABILITY_MACOS_VERSION, VALIDATION_ENABLED, VALIDATION_LAYER},
-    debug_callback::debug_callback,
+    structures::AppData,
 };
 use anyhow::{anyhow, Result};
 use log::*;
-use std::collections::HashSet;
-use vulkanalia::{prelude::v1_0::*, vk::ExtDebugUtilsExtension, window as vk_window, Entry, Instance};
+use std::{collections::HashSet, ffi::CStr, os::raw::c_void};
+use vulkanalia::{prelude::v1_0::*, vk::ExtDebugUtilsExtension, window as vk_window};
 use winit::window::Window;
+
+//================================================
+// Instance
+//================================================
 
 pub unsafe fn create_instance(window: &Window, entry: &Entry, data: &mut AppData) -> Result<Instance> {
     // Application Info
@@ -85,4 +88,26 @@ pub unsafe fn create_instance(window: &Window, entry: &Entry, data: &mut AppData
     }
 
     Ok(instance)
+}
+
+extern "system" fn debug_callback(
+    severity: vk::DebugUtilsMessageSeverityFlagsEXT,
+    type_: vk::DebugUtilsMessageTypeFlagsEXT,
+    data: *const vk::DebugUtilsMessengerCallbackDataEXT,
+    _: *mut c_void,
+) -> vk::Bool32 {
+    let data = unsafe { *data };
+    let message = unsafe { CStr::from_ptr(data.message) }.to_string_lossy();
+
+    if severity >= vk::DebugUtilsMessageSeverityFlagsEXT::ERROR {
+        error!("({:?}) {}", type_, message);
+    } else if severity >= vk::DebugUtilsMessageSeverityFlagsEXT::WARNING {
+        warn!("({:?}) {}", type_, message);
+    } else if severity >= vk::DebugUtilsMessageSeverityFlagsEXT::INFO {
+        debug!("({:?}) {}", type_, message);
+    } else {
+        trace!("({:?}) {}", type_, message);
+    }
+
+    vk::FALSE
 }
